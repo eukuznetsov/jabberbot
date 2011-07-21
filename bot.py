@@ -9,10 +9,12 @@ def loadConfig():
 	password = config.get('connect', 'password')
 	admins = config.get('connect', 'admins').split(',')
 	readOnlyUsers = config.get('connect','readonly').split(',')
-	return {'login':login, 'password': password, 'admin' : admins, 'readOnlyUsers' : readOnlyUsers}
+	return {'login':login, 'password': password, 'admins' : admins, 'readOnlyUsers' : readOnlyUsers}
 
 def message():
-	pass
+	global bot
+	print 'Incoming message!'
+	bot.send(xmpp.protocol.Message('irockez@jabber.ru', 'Ubuntu for dummies!'))
 
 config = loadConfig()
 #create bot
@@ -28,4 +30,8 @@ if (a==None) :
 if (a=='sasl') :
 	print "Connected!"
 #event for inbox messages
-bot.RegisterHandler('message', message)
+bot.RegisterHandler('message', message())
+bot.online = 1
+while bot.online:
+	bot.Process(1)
+bot.disconnect()
