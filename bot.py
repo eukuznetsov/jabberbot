@@ -1,22 +1,41 @@
 #!/usr/bin/python
-import xmpp
+import xmpp, sys,os
 
 def loadConfig():
 	import ConfigParser
 	config = ConfigParser.ConfigParser()
-	config.read('config.ini')
-	login = config.get('connect', 'login')
-	password = config.get('connect', 'password')
-	admins = config.get('connect', 'admins').split(',')
-	readOnlyUsers = config.get('connect','readonly').split(',')
-	return {'login':login, 'password': password, 'admins' : admins, 'readOnlyUsers' : readOnlyUsers}
+	params = {}
+	if os.path.isfile('config.ini'):
+		config.read('config.ini')
+	else:
+		sys.exit('Error: Config file not found')
+	try:
+		params['login'] = config.get('connect', 'login')
+	except ConfigParser.NoOptionError:
+		sys.exit("Eror: not defined login")
+	try:
+		params['password'] = config.get('connect', 'password')
+	except ConfigParser.NoOptionError:
+		sys.exit("Eror: not defined password")
+	try:
+		admins = config.get('connect', 'admins').split(',')
+	except ConfigParser.NoOptionError:
+		print "Warning: not defined admin account"
+	else:
+		params['admins']=admins
+	try:
+		readOnlyUsers = config.get('connect','readonly').split(',')
+	except ConfigParser.NoOptionError:
+		print "Debug: not defined ReadOnly-users"
+	else:
+		params['readOnlyUsers']=readOnlyUsers
+	return  params
 
 def message():
-	global bot
-	print 'Incoming message!'
-	bot.send(xmpp.protocol.Message('irockez@jabber.ru', 'Ubuntu for dummies!'))
+	pass 
 
 config = loadConfig()
+print config['login']
 #create bot
 jid = xmpp.JID(config['login'])
 bot = xmpp.Client(jid.getDomain(), debug = [])
