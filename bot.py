@@ -5,40 +5,41 @@ import logging
 
 LOG_LEVEL = logging.DEBUG
 
-def initLogger():
-	#logging settings
-	logger = logging.getLogger("main")
-	logger.setLevel(LOG_LEVEL)
-	#create handler
-	sh = logging.StreamHandler()
-	sh.setLevel(logging.DEBUG)
-	#set handler for logger
-	logger.addHandler(sh)
-	return logger
+class MyLogger(logging.Logger):
+	def __init__(self, name):
+		#logging settings
+		logging.Logger.__init__(self, name)
+		self.setLevel(LOG_LEVEL)
+		#create handler
+		sh = logging.StreamHandler()
+		sh.setLevel(logging.DEBUG)
+		#set handler for logger
+		self.addHandler(sh)
+		
 
 def loadConfig():
 	import ConfigParser
-	global logger
 	config = ConfigParser.ConfigParser()
+	config.log = MyLogger("config log")
 	params = {}
 	if os.path.isfile('config.ini'):
 		config.read('config.ini')
 	else:
-		logger.critical('Config file not found')
+		config.log.critical('Config file not found')
 	try:
 		params['login'] = config.get('connect', 'login')
 	except ConfigParser.NoOptionError:
-		logger.error("Not defined login")
+		config.log.error("Not defined login")
 		sys.exit()
 	try:
 		params['password'] = config.get('connect', 'password')
 	except ConfigParser.NoOptionError:
-		logger.error("Not defined password")
+		config.log.error("Not defined password")
 		sys.exit()
 	try:
 		admins = config.get('connect', 'admins').split(',')
 	except ConfigParser.NoOptionError:
-		logger.warn()
+		config.log.warn()
 	else:
 		params['admins']=admins
 	try:

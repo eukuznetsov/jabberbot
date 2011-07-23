@@ -3,10 +3,9 @@
 import bot
 
 #init logging
-logger = bot.initLogger()
 
 def main():
-	logger.debug("Start bot")
+	#logger.debug("Start bot")
 	#read config
 	config = bot.loadConfig()
 	
