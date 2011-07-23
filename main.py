@@ -2,12 +2,8 @@
 # -*- coding: utf-8 -*-
 import bot
 
-#init logging
-
 def main():
-	#logger.debug("Start bot")
-	#read config
-	config = bot.loadConfig()
+	jbot = bot.JabberBot()
 	
 if __name__ == "__main__":
 	main()
