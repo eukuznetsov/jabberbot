@@ -1,26 +1,44 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 import xmpp, sys,os
+import logging
+
+LOG_LEVEL = logging.DEBUG
+
+def initLogger():
+	#logging settings
+	logger = logging.getLogger("main")
+	logger.setLevel(LOG_LEVEL)
+	#create handler
+	sh = logging.StreamHandler()
+	sh.setLevel(logging.DEBUG)
+	#set handler for logger
+	logger.addHandler(sh)
+	return logger
 
 def loadConfig():
 	import ConfigParser
+	global logger
 	config = ConfigParser.ConfigParser()
 	params = {}
 	if os.path.isfile('config.ini'):
 		config.read('config.ini')
 	else:
-		sys.exit('Error: Config file not found')
+		logger.critical('Config file not found')
 	try:
 		params['login'] = config.get('connect', 'login')
 	except ConfigParser.NoOptionError:
-		sys.exit("Eror: not defined login")
+		logger.error("Not defined login")
+		sys.exit()
 	try:
 		params['password'] = config.get('connect', 'password')
 	except ConfigParser.NoOptionError:
-		sys.exit("Eror: not defined password")
+		logger.error("Not defined password")
+		sys.exit()
 	try:
 		admins = config.get('connect', 'admins').split(',')
 	except ConfigParser.NoOptionError:
-		print "Warning: not defined admin account"
+		logger.warn()
 	else:
 		params['admins']=admins
 	try:
@@ -31,26 +49,11 @@ def loadConfig():
 		params['readOnlyUsers']=readOnlyUsers
 	return  params
 
-def message():
-	pass 
+#class JabberBot(xmpp.Client):
+	##init
+	#def __init__(self, login, password):
+		#self.login = login
+		#self.password = password
+		#self.online = 0
+	
 
-config = loadConfig()
-print config['login']
-#create bot
-jid = xmpp.JID(config['login'])
-bot = xmpp.Client(jid.getDomain(), debug = [])
-bot.config = config
-#connect to server
-bot.connect()
-a = bot.auth(jid.getNode(), bot.config['password'])
-#view user info about connecting to server
-if (a==None) :
-	print "Error: can't connect to server"
-if (a=='sasl') :
-	print "Connected!"
-#event for inbox messages
-bot.RegisterHandler('message', message())
-bot.online = 1
-while bot.online:
-	bot.Process(1)
-bot.disconnect()
