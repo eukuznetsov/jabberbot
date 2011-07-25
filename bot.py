@@ -22,22 +22,22 @@ class JabberBot():
 		self.log = MyLogger('main logger')
 		self.readConfig()
 		self.client = sleekxmpp.ClientXMPP(self.config['jid'], self.config['password'])
+		self.addHandlers()
+		self.client.online = 0
 	
 	def online(self): 
-		conn = self.client.connect()
-		if conn:
+		if self.client.connect():
 			self.log.info("Connect to server")
 		else:
 			self.log.critical("Unable to connect to server %s", self.client.getjidresourse())
-		print(conn)
 		self.client.sendPresence()
-		self.client.sendMessage("irockez@jabber.ru", "Hi!")
 		self.client.process(threaded="false")
+		self.client.online = 1
 	
 	def offline(self): 
-		self.disconnected()
+		self.client.disconnect()
 		self.log.info("Disconnect from server")
-		sys.exit()
+		self.client.online = 0
 		
 	def readConfig(self):
 		import configparser
@@ -51,7 +51,7 @@ class JabberBot():
 			self.config['jid'] = config.get('connect', 'jid')
 		except configparser.NoOptionError:
 			self.log.critical("Not defined login")
-			self.log("Login: ",self.client.getjidresourse())
+		self.log.debug("Login: ",self.config['jid'])
 		try:
 			self.config['password'] = config.get('connect', 'password')
 		except configparser.NoOptionError:
@@ -70,7 +70,7 @@ class JabberBot():
 			self.config['readOnlyUsers']=readOnlyUsers
 
 	def addHandlers(self):
-		self._owner = self.client
-		self.RegisterHandler('message', self.online)
-		#self.RegisterDisconnetHandler(self, )
-		pass
+		self.client.add_event_handler('message', self.processMessage)
+		
+	def processMessage(self, msg):
+		print(msg['from'])
