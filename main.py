@@ -5,12 +5,11 @@ import bot, time
 def main():
 	jbot = bot.JabberBot()
 	jbot.online()
-	while jbot.client.online:
+	while jbot.status:
 		try:
 			time.sleep(1)
 		except KeyboardInterrupt:
 			jbot.offline()
-	#jbot.offline()
 	
 if __name__ == "__main__":
 	main()

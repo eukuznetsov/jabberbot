@@ -17,27 +17,27 @@ class MyLogger(logging.Logger):
 		#set handler for logger
 		self.addHandler(sh)
 
-class JabberBot():
+class JabberBot(sleekxmpp.ClientXMPP):
 	def __init__(self):
 		self.log = MyLogger('main logger')
 		self.readConfig()
-		self.client = sleekxmpp.ClientXMPP(self.config['jid'], self.config['password'])
+		sleekxmpp.ClientXMPP.__init__(self, self.config['jid'], self.config['password'])
 		self.addHandlers()
-		self.client.online = 0
+		self.status = 0
 	
 	def online(self): 
-		if self.client.connect():
+		if self.connect():
 			self.log.info("Connect to server")
 		else:
 			self.log.critical("Unable to connect to server %s", self.client.getjidresourse())
-		self.client.sendPresence()
-		self.client.process(threaded="false")
-		self.client.online = 1
+		self.sendPresence()
+		self.process(threaded="false")
+		self.status = 1
 	
 	def offline(self): 
-		self.client.disconnect()
+		self.disconnect()
 		self.log.info("Disconnect from server")
-		self.client.online = 0
+		self.status = 0
 		
 	def readConfig(self):
 		import configparser
@@ -70,7 +70,12 @@ class JabberBot():
 			self.config['readOnlyUsers']=readOnlyUsers
 
 	def addHandlers(self):
-		self.client.add_event_handler('message', self.processMessage)
+		self.add_event_handler('message', self.processMessage)
 		
 	def processMessage(self, msg):
-		print(msg['from'])
+		self.log.info('Incomming message from %s', msg['from'])
+		if msg['from'] in self.config['admins']:
+			self.sendMessage(msg['from'], 'Hello, admin!')
+		else:
+			self.sendMessage(msg['from'], 'Access forbidden!')
+		
