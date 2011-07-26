@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import sleekxmpp, sys,os
 import logging
-
+  
 LOG_LEVEL = logging.DEBUG
 PRESENCE = 1
 
@@ -51,7 +51,8 @@ class JabberBot(sleekxmpp.ClientXMPP):
 			self.config['jid'] = config.get('connect', 'jid')
 		except configparser.NoOptionError:
 			self.log.critical("Not defined login")
-		self.log.debug("Login: ",self.config['jid'])
+		else:
+			self.log.debug("Login: " + self.config['jid'])
 		try:
 			self.config['password'] = config.get('connect', 'password')
 		except configparser.NoOptionError:
