@@ -5,6 +5,7 @@ import logging
   
 LOG_LEVEL = logging.DEBUG
 PRESENCE = 1
+PLUGIN_PATH = 'plugins'
 
 class MyLogger(logging.Logger):
 	def __init__(self, name):
@@ -71,12 +72,19 @@ class JabberBot(sleekxmpp.ClientXMPP):
 			self.config['readOnlyUsers']=readOnlyUsers
 
 	def addHandlers(self):
-		self.add_event_handler('message', self.processMessage)
+		self.loadPlugins()
 		
-	def processMessage(self, msg):
-		self.log.info('Incomming message from %s', msg['from'])
-		if msg['from'] in self.config['admins']:
-			self.sendMessage(msg['from'], 'Hello, admin!')
+	def loadPlugins(self):
+		dirs = PLUGIN_PATH.split(',')
+		self.plugins = []
+		for i in range(len(dirs)):
+			sys.path.insert(0, dirs[i])		
+			self.plugins.append(os.listdir(dirs[i]))
+		#print all found plugins
+		if len(self.plugins):
+			self.log.debug('List of plugins:'+str(len(self.plugins)))
+			for i in range(len(self.plugins)):
+				self.log.debug(self.plugins[i])
 		else:
-			self.sendMessage(msg['from'], 'Access forbidden!')
+			self.log.info("Plugins not found")
 		
