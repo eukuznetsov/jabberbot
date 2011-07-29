@@ -1,4 +1,4 @@
-#!/usr/bin/python
+	#!/usr/bin/python
 # -*- coding: utf-8 -*-
 import sleekxmpp, sys,os
 import logging
@@ -23,6 +23,7 @@ class JabberBot(sleekxmpp.ClientXMPP):
 		self.log = MyLogger('main logger')
 		self.readConfig()
 		sleekxmpp.ClientXMPP.__init__(self, self.config['jid'], self.config['password'])
+		self.loadPlugins()
 		self.addHandlers()
 		self.status = 0
 	
@@ -72,26 +73,40 @@ class JabberBot(sleekxmpp.ClientXMPP):
 			self.config['readOnlyUsers']=readOnlyUsers
 
 	def addHandlers(self):
-		self.loadPlugins()
-		
+		if len(self.plugins):
+			self.log.debug('Register handlers:')
+			#get dictionary with events and functions name 
+			for name in self.plugins:
+				handlers = self.plugins[name].listHandlers()
+				for event in handlers:
+					for func in handlers[event]:
+						self.log.debug(name+':'+event+':'+func)
+						func = getattr(self.plugins[name], func)
+						self.add_event_handler('message', func)
+
 	def loadPlugins(self):
 		dirs = PLUGIN_PATH.split(',')
-		self.plugins = []
+		#files in plugins directory
+		files = []
+		#modules
+		self.plugins = {}
+		#find files in dirs and add dirs in PATH
 		for directory in dirs:
-			if os.path.exists(directory):
+			if os.path.isdir(directory):
 				sys.path.insert(0, directory)
-				self.plugins += os.listdir(directory)
+				dir_obj = os.listdir(directory)
+				for i in range(len(dir_obj)):
+					if os.path.isfile(os.path.join(directory, dir_obj[i])):
+						files.append(dir_obj[i])
 				self.log.debug('Directory "'+directory+'" add to path')
 			else:
 				self.log.warn('Path '+directory+'not found')
-		if len(self.plugins):
-			self.log.debug('Plugins found: '+','.join(self.plugins))
-			self.plugins = map(__import__, self.plugins)
+		#import plugins
+		if len(files):
+			self.log.debug('Plugins found: '+','.join(files))
+			for i in range(len(files)):
+				name = os.path.splitext(files[i])[0]
+				self.plugins[name] = __import__(name) 
+				print(name)
 		else:
 			self.log.debug('Plugins not found')
-		self.plugins[0].name()
-				###self.plugins[i][j]=__import__(self.plugins[i][j].split('.')[0])
-		#else:
-			#self.log.info("Plugins not found")
-		###import modules
-		###self.log.debug(dir(self.plugins[0]))
