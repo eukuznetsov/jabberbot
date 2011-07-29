@@ -80,9 +80,9 @@ class JabberBot(sleekxmpp.ClientXMPP):
 				handlers = self.plugins[name].listHandlers()
 				for event in handlers:
 					for func in handlers[event]:
-						self.log.debug(name+':'+event+':'+func)
-						func = getattr(self.plugins[name], func)
-						self.add_event_handler('message', func)
+						self.log.debug(name+':'+event+':'+func.__name__)
+						#funct = getattr(self.plugins[name], func)
+						self.add_event_handler(event, func)
 
 	def loadPlugins(self):
 		dirs = PLUGIN_PATH.split(',')
