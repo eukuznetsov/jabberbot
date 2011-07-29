@@ -107,6 +107,6 @@ class JabberBot(sleekxmpp.ClientXMPP):
 			for i in range(len(files)):
 				name = os.path.splitext(files[i])[0]
 				self.plugins[name] = __import__(name) 
-				print(name)
+				sel.log.debug(name)
 		else:
 			self.log.debug('Plugins not found')
