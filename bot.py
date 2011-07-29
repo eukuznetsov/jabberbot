@@ -77,14 +77,21 @@ class JabberBot(sleekxmpp.ClientXMPP):
 	def loadPlugins(self):
 		dirs = PLUGIN_PATH.split(',')
 		self.plugins = []
-		for i in range(len(dirs)):
-			sys.path.insert(0, dirs[i])		
-			self.plugins.append(os.listdir(dirs[i]))
-		#print all found plugins
+		for directory in dirs:
+			if os.path.exists(directory):
+				sys.path.insert(0, directory)
+				self.plugins += os.listdir(directory)
+				self.log.debug('Directory "'+directory+'" add to path')
+			else:
+				self.log.warn('Path '+directory+'not found')
 		if len(self.plugins):
-			self.log.debug('List of plugins:'+str(len(self.plugins)))
-			for i in range(len(self.plugins)):
-				self.log.debug(self.plugins[i])
+			self.log.debug('Plugins found: '+','.join(self.plugins))
+			self.plugins = map(__import__, self.plugins)
 		else:
-			self.log.info("Plugins not found")
-		
+			self.log.debug('Plugins not found')
+		self.plugins[0].name()
+				###self.plugins[i][j]=__import__(self.plugins[i][j].split('.')[0])
+		#else:
+			#self.log.info("Plugins not found")
+		###import modules
+		###self.log.debug(dir(self.plugins[0]))
