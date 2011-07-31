@@ -81,8 +81,7 @@ class JabberBot(sleekxmpp.ClientXMPP):
 				for event in handlers:
 					for func in handlers[event]:
 						self.log.debug(name+':'+event+':'+func.__name__)
-						#funct = getattr(self.plugins[name], func)
-						self.add_event_handler(event, func)
+						self.add_event_handler(event, func.__get__(self, JabberBot))
 
 	def loadPlugins(self):
 		dirs = PLUGIN_PATH.split(',')
@@ -106,7 +105,8 @@ class JabberBot(sleekxmpp.ClientXMPP):
 			self.log.debug('Plugins found: '+','.join(files))
 			for i in range(len(files)):
 				name = os.path.splitext(files[i])[0]
-				self.plugins[name] = __import__(name) 
-				sel.log.debug(name)
+				self.plugins[name] = __import__(name)
+				self.functions = {} 
+				self.log.debug(name)
 		else:
 			self.log.debug('Plugins not found')

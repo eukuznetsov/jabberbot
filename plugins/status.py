@@ -8,8 +8,8 @@ def name():
 def listHandlers():
 	return {}
 	
-def uptime(msg):
-	print('Fuck you!')
+def uptime():
+	return('Fuck you!')
 
-def hello(msg):
-	print('Bot say Hello!')
+def hello():
+	return('Bot say Hello!')
